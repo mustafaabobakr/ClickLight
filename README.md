@@ -6,7 +6,7 @@ It is personal software: one small presentation annoyance, fixed directly.
 
 ## Demo
 
-![ClickLight showing click highlights from the macOS menu bar](docs/assets/clicklight-demo.gif)
+![ClickLight showing click highlights from the macOS menu bar](docs/assets/ClickLight.gif)
 
 ## What It Does
 
