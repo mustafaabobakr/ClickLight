@@ -239,7 +239,7 @@ final class ClickOverlayView: NSView {
     private func duration(for kind: ClickKind) -> TimeInterval {
         switch kind {
         case .drag:
-            return min(0.2, settings.duration * 0.55)
+            return min(0.38, settings.duration * 0.82)
         case .leftUp, .rightUp:
             return settings.duration * 0.78
         case .leftDown, .rightDown:
