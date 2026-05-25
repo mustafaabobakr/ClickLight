@@ -5,12 +5,20 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
+    name: Build, sign, notarize, and publish
     runs-on: macos-latest
     environment: release
     permissions:
-      contents: write
+      contents: write # Required to push release metadata and create the GitHub Release.
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
