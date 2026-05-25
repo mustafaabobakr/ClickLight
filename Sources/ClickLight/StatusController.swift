@@ -5,6 +5,7 @@ final class StatusController {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let settingsStore: SettingsStore
     private let permissions: PermissionController
+    private let launchAtLogin: LaunchAtLoginManaging
     private let captureStatus: () -> String
     private let onCheckForUpdates: () -> Void
     private let updatesAreConfigured: () -> Bool
@@ -14,6 +15,7 @@ final class StatusController {
     init(
         settingsStore: SettingsStore,
         permissions: PermissionController,
+        launchAtLogin: LaunchAtLoginManaging,
         captureStatus: @escaping () -> String,
         onCheckForUpdates: @escaping () -> Void,
         updatesAreConfigured: @escaping () -> Bool,
@@ -22,6 +24,7 @@ final class StatusController {
     ) {
         self.settingsStore = settingsStore
         self.permissions = permissions
+        self.launchAtLogin = launchAtLogin
         self.captureStatus = captureStatus
         self.onCheckForUpdates = onCheckForUpdates
         self.updatesAreConfigured = updatesAreConfigured
@@ -84,6 +87,11 @@ final class StatusController {
             title: "Show Menu Bar Text",
             isOn: settings.showMenuBarText,
             action: #selector(toggleMenuBarText)
+        ))
+        menu.addItem(toggleItem(
+            title: "Launch at Login",
+            isOn: launchAtLogin.isEnabled,
+            action: #selector(toggleLaunchAtLogin)
         ))
         menu.addItem(NSMenuItem.separator())
 
@@ -224,6 +232,16 @@ final class StatusController {
 
     @objc private func toggleMenuBarText() {
         settingsStore.update { $0.showMenuBarText.toggle() }
+    }
+
+    @objc private func toggleLaunchAtLogin() {
+        let enabled = LaunchAtLoginState.toggledValue(currentlyEnabled: launchAtLogin.isEnabled)
+        do {
+            try launchAtLogin.setEnabled(enabled)
+        } catch {
+            NSLog("ClickLight: Failed to update launch at login: \(error)")
+        }
+        rebuildMenu()
     }
 
     @objc private func selectSize(_ sender: NSMenuItem) {
