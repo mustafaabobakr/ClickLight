@@ -67,14 +67,14 @@ See [Releasing](docs/RELEASING.md). Until the first release is published, recent
 
 ## Uninstall
 
-> **Manual uninstall**
-> If you installed ClickLight manually, see [Remove Manual Install](docs/MANUAL_INSTALL.md#remove-manual-install).
+For now, uninstall manual builds with [Remove Manual Install](docs/MANUAL_INSTALL.md#remove-manual-install).
 
-If you installed ClickLight with Homebrew:
-
-```bash
-brew uninstall --cask clicklight
-```
+> **Future Homebrew uninstall**
+> After Homebrew installation is available, uninstall with:
+>
+> ```bash
+> brew uninstall --cask clicklight
+> ```
 
 ## License
 
