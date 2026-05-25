@@ -71,6 +71,16 @@ The workflow will:
 6. update `Casks/clicklight.rb`
 7. create a GitHub Release
 
+## Release Notes
+
+GitHub Releases are the public changelog for ClickLight. The workflow creates release notes with:
+
+```bash
+gh release create "v${VERSION}" ClickLight.zip --generate-notes
+```
+
+The generated notes are organized by `.github/release.yml`. Use labels like `feature`, `bug`, `documentation`, `security`, `maintenance`, and `refactor` on pull requests to place changes in the right section.
+
 ## Homebrew Install
 
 Users can install the latest published release with:

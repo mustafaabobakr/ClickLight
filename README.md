@@ -54,9 +54,9 @@ Start with [Local Development](docs/LOCAL_DEVELOPMENT.md).
 
 ## Releasing
 
-Release scaffolding is included for Developer ID signing, notarization, Sparkle auto-updates, GitHub Releases, and a Homebrew cask.
+Releases are signed, notarized, published to GitHub Releases, installable with Homebrew, and prepared for Sparkle updates.
 
-See [Releasing](docs/RELEASING.md). Recent changes are tracked in the [Changelog](CHANGELOG.md).
+See [Releasing](docs/RELEASING.md). What's new is tracked in [GitHub Releases](https://github.com/aurorascharff/ClickLight/releases).
 
 ## Uninstall
 
