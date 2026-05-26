@@ -8,6 +8,8 @@
     <string>ClickLight</string>
     <key>CFBundleIdentifier</key>
     <string>com.aurorascharff.ClickLight</string>
+    <key>CFBundleIconFile</key>
+    <string>ClickLight</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
