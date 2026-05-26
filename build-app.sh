@@ -25,6 +25,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$ROOT_DIR/.build/$CONFIGURATION"
 APP_DIR="$ROOT_DIR/$APP_NAME.app"
 ZIP_PATH="$ROOT_DIR/$APP_NAME.zip"
+ICON_SOURCE="$ROOT_DIR/AppIcon.icon/Assets/ClickLight-icon.png"
+ICON_RENDER_SCRIPT="$ROOT_DIR/scripts/render-icon.swift"
+ICON_RENDERED_SOURCE="$BUILD_DIR/$APP_NAME-rendered-icon.png"
+ICONSET_DIR="$BUILD_DIR/$APP_NAME.iconset"
 
 VERSION="$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.1.0")"
 
@@ -39,6 +43,31 @@ cp "$ROOT_DIR/Info.plist" "$APP_DIR/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_IDENTIFIER" "$APP_DIR/Contents/Info.plist"
 
 cp "$BUILD_DIR/$APP_NAME" "$APP_DIR/Contents/MacOS/$APP_NAME"
+
+if [ ! -f "$ICON_SOURCE" ]; then
+    echo "Missing app icon source: $ICON_SOURCE"
+    exit 1
+fi
+
+if [ ! -f "$ICON_RENDER_SCRIPT" ]; then
+    echo "Missing app icon renderer: $ICON_RENDER_SCRIPT"
+    exit 1
+fi
+
+rm -rf "$ICONSET_DIR"
+mkdir -p "$ICONSET_DIR"
+swift "$ICON_RENDER_SCRIPT" "$ICON_SOURCE" "$ICON_RENDERED_SOURCE"
+sips -z 16 16 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_16x16.png" >/dev/null
+sips -z 32 32 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_16x16@2x.png" >/dev/null
+sips -z 32 32 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_32x32.png" >/dev/null
+sips -z 64 64 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_32x32@2x.png" >/dev/null
+sips -z 128 128 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_128x128.png" >/dev/null
+sips -z 256 256 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_128x128@2x.png" >/dev/null
+sips -z 256 256 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_256x256.png" >/dev/null
+sips -z 512 512 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_256x256@2x.png" >/dev/null
+sips -z 512 512 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_512x512.png" >/dev/null
+sips -z 1024 1024 "$ICON_RENDERED_SOURCE" --out "$ICONSET_DIR/icon_512x512@2x.png" >/dev/null
+iconutil --convert icns "$ICONSET_DIR" --output "$APP_DIR/Contents/Resources/$APP_NAME.icns"
 
 SPARKLE_PATH="$(find "$ROOT_DIR/.build" -name "Sparkle.framework" -type d | head -1)"
 if [ -n "$SPARKLE_PATH" ]; then
