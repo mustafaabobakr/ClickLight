@@ -1,5 +1,7 @@
-import AppKit
+import CoreGraphics
 import Foundation
+import ImageIO
+import UniformTypeIdentifiers
 
 let arguments = CommandLine.arguments
 
@@ -11,56 +13,58 @@ guard arguments.count == 3 else {
 let glyphURL = URL(fileURLWithPath: arguments[1])
 let outputURL = URL(fileURLWithPath: arguments[2])
 
-guard let glyph = NSImage(contentsOf: glyphURL) else {
+guard
+    let glyphSource = CGImageSourceCreateWithURL(glyphURL as CFURL, nil),
+    let glyph = CGImageSourceCreateImageAtIndex(glyphSource, 0, nil)
+else {
     fputs("Could not read icon glyph at \(glyphURL.path)\n", stderr)
     exit(66)
 }
 
-let iconSize = NSSize(width: 1024, height: 1024)
-let bounds = NSRect(origin: .zero, size: iconSize)
+let size = 1024
+let bounds = CGRect(x: 0, y: 0, width: size, height: size)
 
 guard
-    let bitmap = NSBitmapImageRep(
-        bitmapDataPlanes: nil,
-        pixelsWide: Int(iconSize.width),
-        pixelsHigh: Int(iconSize.height),
-        bitsPerSample: 8,
-        samplesPerPixel: 4,
-        hasAlpha: true,
-        isPlanar: false,
-        colorSpaceName: .deviceRGB,
+    let colorSpace = CGColorSpace(name: CGColorSpace.displayP3) ?? CGColorSpace(name: CGColorSpace.sRGB),
+    let context = CGContext(
+        data: nil,
+        width: size,
+        height: size,
+        bitsPerComponent: 8,
         bytesPerRow: 0,
-        bitsPerPixel: 0
-    ),
-    let graphicsContext = NSGraphicsContext(bitmapImageRep: bitmap)
+        space: colorSpace,
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    )
 else {
     fputs("Could not create icon render context\n", stderr)
     exit(70)
 }
 
-bitmap.size = iconSize
-graphicsContext.imageInterpolation = .high
+context.clear(bounds)
 
-NSGraphicsContext.saveGraphicsState()
-NSGraphicsContext.current = graphicsContext
+let cornerRadius: CGFloat = 224
+let roundedRect = CGPath(
+    roundedRect: bounds,
+    cornerWidth: cornerRadius,
+    cornerHeight: cornerRadius,
+    transform: nil
+)
 
-let context = graphicsContext.cgContext
+context.saveGState()
+context.addPath(roundedRect)
+context.clip()
 
-let backgroundPath = NSBezierPath(roundedRect: bounds, xRadius: 224, yRadius: 224)
-backgroundPath.addClip()
-
-let colorSpace = CGColorSpace(name: CGColorSpace.displayP3) ?? CGColorSpaceCreateDeviceRGB()
-let colors = [
-    NSColor(displayP3Red: 0.23193, green: 0.41350, blue: 0.80588, alpha: 1).cgColor,
-    NSColor(displayP3Red: 0.38860, green: 0.77688, blue: 0.96841, alpha: 1).cgColor,
+let gradientColors = [
+    CGColor(red: 0.23193, green: 0.41350, blue: 0.80588, alpha: 1),
+    CGColor(red: 0.38860, green: 0.77688, blue: 0.96841, alpha: 1),
 ] as CFArray
 
-if let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: [0, 1]) {
+if let gradient = CGGradient(colorsSpace: colorSpace, colors: gradientColors, locations: [0, 1]) {
     context.drawLinearGradient(
         gradient,
         start: CGPoint(x: bounds.midX, y: bounds.minY),
         end: CGPoint(x: bounds.midX, y: bounds.maxY),
-        options: []
+        options: [.drawsBeforeStartLocation, .drawsAfterEndLocation]
     )
 }
 
@@ -68,24 +72,34 @@ context.saveGState()
 context.setShadow(
     offset: CGSize(width: 0, height: -28),
     blur: 26,
-    color: NSColor.black.withAlphaComponent(0.5).cgColor
+    color: CGColor(gray: 0, alpha: 0.5)
 )
-glyph.draw(in: bounds, from: .zero, operation: .sourceOver, fraction: 0.88)
+context.setAlpha(0.88)
+context.draw(glyph, in: bounds)
 context.restoreGState()
 
-NSColor.white.withAlphaComponent(0.16).setFill()
-backgroundPath.fill()
+context.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 0.16))
+context.addPath(roundedRect)
+context.fillPath()
 
-NSGraphicsContext.restoreGraphicsState()
+context.restoreGState()
 
-guard let pngData = bitmap.representation(using: .png, properties: [:]) else {
-    fputs("Could not encode rendered icon as PNG\n", stderr)
+guard
+    let image = context.makeImage(),
+    let destination = CGImageDestinationCreateWithURL(
+        outputURL as CFURL,
+        UTType.png.identifier as CFString,
+        1,
+        nil
+    )
+else {
+    fputs("Could not create rendered icon PNG at \(outputURL.path)\n", stderr)
     exit(70)
 }
 
-do {
-    try pngData.write(to: outputURL, options: .atomic)
-} catch {
-    fputs("Could not write rendered icon to \(outputURL.path): \(error)\n", stderr)
+CGImageDestinationAddImage(destination, image, nil)
+
+guard CGImageDestinationFinalize(destination) else {
+    fputs("Could not write rendered icon to \(outputURL.path)\n", stderr)
     exit(73)
 }
