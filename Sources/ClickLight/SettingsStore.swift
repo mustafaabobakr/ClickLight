@@ -17,9 +17,9 @@ struct ClickSettings: Equatable {
 
     var customColor: NSColor {
         NSColor(
-            calibratedRed: customColorRed,
-            green: customColorGreen,
-            blue: customColorBlue,
+            calibratedRed: customColorRed.sanitizedColorComponent,
+            green: customColorGreen.sanitizedColorComponent,
+            blue: customColorBlue.sanitizedColorComponent,
             alpha: 1
         )
     }
@@ -134,9 +134,9 @@ final class SettingsStore {
                 intensity: CGFloat(defaults.double(forKey: Key.intensity)),
                 duration: defaults.double(forKey: Key.duration),
                 colorPreset: ClickColorPreset(rawValue: defaults.string(forKey: Key.colorPreset) ?? "") ?? .default,
-                customColorRed: CGFloat(defaults.double(forKey: Key.customColorRed)),
-                customColorGreen: CGFloat(defaults.double(forKey: Key.customColorGreen)),
-                customColorBlue: CGFloat(defaults.double(forKey: Key.customColorBlue))
+                customColorRed: CGFloat(defaults.double(forKey: Key.customColorRed)).sanitizedColorComponent,
+                customColorGreen: CGFloat(defaults.double(forKey: Key.customColorGreen)).sanitizedColorComponent,
+                customColorBlue: CGFloat(defaults.double(forKey: Key.customColorBlue)).sanitizedColorComponent
             )
         }
         set {
@@ -180,5 +180,13 @@ final class SettingsStore {
             Key.customColorGreen: Double(defaults.customColorGreen),
             Key.customColorBlue: Double(defaults.customColorBlue)
         ])
+    }
+}
+
+private extension CGFloat {
+    /// Returns the value clamped to [0, 1], substituting 0 for NaN/infinite.
+    var sanitizedColorComponent: CGFloat {
+        guard isFinite else { return 0 }
+        return Swift.min(1, Swift.max(0, self))
     }
 }

@@ -105,13 +105,13 @@ final class StatusController {
         menu.addItem(submenu(
             title: "Size",
             options: ClickSettingOptions.sizePresets,
-            selected: settings.size,
+            selected: Double(settings.size),
             action: #selector(selectSize(_:))
         ))
         menu.addItem(submenu(
             title: "Intensity",
             options: ClickSettingOptions.intensityPresets,
-            selected: settings.intensity,
+            selected: Double(settings.intensity),
             action: #selector(selectIntensity(_:))
         ))
         menu.addItem(submenu(
@@ -173,39 +173,12 @@ final class StatusController {
     private func submenu(
         title: String,
         options: [ClickNumericPreset],
-        selected: CGFloat,
+        selected: Double,
         action: Selector
     ) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
         let menu = NSMenu()
-        let selectedPreset = ClickSettingOptions.matchingPreset(for: selected, in: options)
-        for option in options {
-            let child = NSMenuItem(title: option.title, action: action, keyEquivalent: "")
-            child.target = self
-            child.representedObject = option.value
-            child.state = selectedPreset?.value == option.value ? .on : .off
-            menu.addItem(child)
-        }
-        if selectedPreset == nil {
-            menu.addItem(NSMenuItem.separator())
-            let custom = NSMenuItem(title: "Custom", action: nil, keyEquivalent: "")
-            custom.state = .on
-            custom.isEnabled = false
-            menu.addItem(custom)
-        }
-        item.submenu = menu
-        return item
-    }
-
-    private func submenu(
-        title: String,
-        options: [ClickNumericPreset],
-        selected: TimeInterval,
-        action: Selector
-    ) -> NSMenuItem {
-        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
-        let menu = NSMenu()
-        let selectedPreset = ClickSettingOptions.matchingPreset(for: selected, in: options)
+        let selectedPreset = options.first { abs($0.value - selected) < 0.01 }
         for option in options {
             let child = NSMenuItem(title: option.title, action: action, keyEquivalent: "")
             child.target = self

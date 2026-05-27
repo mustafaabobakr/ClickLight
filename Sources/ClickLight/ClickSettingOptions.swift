@@ -1,4 +1,4 @@
-import AppKit
+import Foundation
 
 struct ClickNumericPreset: Equatable {
     let title: String

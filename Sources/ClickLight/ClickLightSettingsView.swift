@@ -76,6 +76,7 @@ struct ClickLightSettingsView: View {
                     Toggle("", isOn: binding(\.isEnabled))
                         .toggleStyle(.switch)
                         .labelsHidden()
+                        .accessibilityLabel("Enable ClickLight")
                 }
             }
 
@@ -224,6 +225,7 @@ struct ClickLightSettingsView: View {
                             supportsOpacity: false
                         )
                         .labelsHidden()
+                        .accessibilityLabel("Custom Color Picker")
                     }
                 }
             }
@@ -238,6 +240,7 @@ struct ClickLightSettingsView: View {
                     Toggle("", isOn: binding(\.showPress))
                         .toggleStyle(.switch)
                         .labelsHidden()
+                        .accessibilityLabel("Show Press")
                 }
                 Divider().padding(.vertical, 6)
                 ModernRow(title: "Show Release",
@@ -245,6 +248,7 @@ struct ClickLightSettingsView: View {
                     Toggle("", isOn: binding(\.showRelease))
                         .toggleStyle(.switch)
                         .labelsHidden()
+                        .accessibilityLabel("Show Release")
                 }
                 Divider().padding(.vertical, 6)
                 ModernRow(title: "Show Right Click",
@@ -252,6 +256,7 @@ struct ClickLightSettingsView: View {
                     Toggle("", isOn: binding(\.showRightClick))
                         .toggleStyle(.switch)
                         .labelsHidden()
+                        .accessibilityLabel("Show Right Click")
                 }
                 Divider().padding(.vertical, 6)
                 ModernRow(title: "Show Drag",
@@ -259,6 +264,7 @@ struct ClickLightSettingsView: View {
                     Toggle("", isOn: binding(\.showDrag))
                         .toggleStyle(.switch)
                         .labelsHidden()
+                        .accessibilityLabel("Show Drag")
                 }
             }
         }
@@ -271,6 +277,7 @@ struct ClickLightSettingsView: View {
                 Toggle("", isOn: binding(\.showMenuBarText))
                     .toggleStyle(.switch)
                     .labelsHidden()
+                    .accessibilityLabel("Show Menu Bar Text")
             }
         }
     }
@@ -287,6 +294,7 @@ struct ClickLightSettingsView: View {
                         ))
                         .toggleStyle(.switch)
                         .labelsHidden()
+                        .accessibilityLabel("Launch at Login")
                     }
                     if let message = viewModel.launchAtLoginErrorMessage {
                         Label(message, systemImage: "exclamationmark.triangle.fill")
@@ -358,10 +366,10 @@ struct ClickLightSettingsView: View {
             ForEach(options, id: \.value) { preset in
                 Text(preset.title).tag(String(preset.value))
             }
-            Text("Custom").tag("custom")
         }
         .labelsHidden()
         .pickerStyle(.segmented)
+        .accessibilityLabel("Preset")
     }
 
     @ViewBuilder

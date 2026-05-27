@@ -83,6 +83,7 @@ final class ClickLightSettingsViewModel: NSObject, ObservableObject {
     }
 
     @objc private func settingsDidChange() {
+        refreshSystemState()
         objectWillChange.send()
     }
 
