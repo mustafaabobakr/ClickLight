@@ -23,6 +23,9 @@ struct ClickSettings: Equatable {
     var customRightColorRed: CGFloat
     var customRightColorGreen: CGFloat
     var customRightColorBlue: CGFloat
+    var customMiddleColorRed: CGFloat
+    var customMiddleColorGreen: CGFloat
+    var customMiddleColorBlue: CGFloat
     var customDragColorRed: CGFloat
     var customDragColorGreen: CGFloat
     var customDragColorBlue: CGFloat
@@ -50,6 +53,15 @@ struct ClickSettings: Equatable {
             calibratedRed: customRightColorRed.sanitizedColorComponent,
             green: customRightColorGreen.sanitizedColorComponent,
             blue: customRightColorBlue.sanitizedColorComponent,
+            alpha: 1
+        )
+    }
+
+    var customMiddleColor: NSColor {
+        NSColor(
+            calibratedRed: customMiddleColorRed.sanitizedColorComponent,
+            green: customMiddleColorGreen.sanitizedColorComponent,
+            blue: customMiddleColorBlue.sanitizedColorComponent,
             alpha: 1
         )
     }
@@ -86,6 +98,9 @@ struct ClickSettings: Equatable {
         customRightColorRed: 1.0,
         customRightColorGreen: 0.46,
         customRightColorBlue: 0.19,
+        customMiddleColorRed: 0.27,
+        customMiddleColorGreen: 0.92,
+        customMiddleColorBlue: 0.58,
         customDragColorRed: 0.92,
         customDragColorGreen: 0.84,
         customDragColorBlue: 0.22
@@ -109,6 +124,7 @@ enum CustomClickColorMode: String, CaseIterable, Equatable {
 enum CustomClickColorTarget {
     case left
     case right
+    case middle
     case drag
 }
 
@@ -197,6 +213,9 @@ final class SettingsStore {
         static let customRightColorRed = "customRightColorRed"
         static let customRightColorGreen = "customRightColorGreen"
         static let customRightColorBlue = "customRightColorBlue"
+        static let customMiddleColorRed = "customMiddleColorRed"
+        static let customMiddleColorGreen = "customMiddleColorGreen"
+        static let customMiddleColorBlue = "customMiddleColorBlue"
         static let customDragColorRed = "customDragColorRed"
         static let customDragColorGreen = "customDragColorGreen"
         static let customDragColorBlue = "customDragColorBlue"
@@ -234,6 +253,9 @@ final class SettingsStore {
                 customRightColorRed: CGFloat(defaults.double(forKey: Key.customRightColorRed)).sanitizedColorComponent,
                 customRightColorGreen: CGFloat(defaults.double(forKey: Key.customRightColorGreen)).sanitizedColorComponent,
                 customRightColorBlue: CGFloat(defaults.double(forKey: Key.customRightColorBlue)).sanitizedColorComponent,
+                customMiddleColorRed: CGFloat(defaults.double(forKey: Key.customMiddleColorRed)).sanitizedColorComponent,
+                customMiddleColorGreen: CGFloat(defaults.double(forKey: Key.customMiddleColorGreen)).sanitizedColorComponent,
+                customMiddleColorBlue: CGFloat(defaults.double(forKey: Key.customMiddleColorBlue)).sanitizedColorComponent,
                 customDragColorRed: CGFloat(defaults.double(forKey: Key.customDragColorRed)).sanitizedColorComponent,
                 customDragColorGreen: CGFloat(defaults.double(forKey: Key.customDragColorGreen)).sanitizedColorComponent,
                 customDragColorBlue: CGFloat(defaults.double(forKey: Key.customDragColorBlue)).sanitizedColorComponent
@@ -262,6 +284,9 @@ final class SettingsStore {
             defaults.set(Double(newValue.customRightColorRed), forKey: Key.customRightColorRed)
             defaults.set(Double(newValue.customRightColorGreen), forKey: Key.customRightColorGreen)
             defaults.set(Double(newValue.customRightColorBlue), forKey: Key.customRightColorBlue)
+            defaults.set(Double(newValue.customMiddleColorRed), forKey: Key.customMiddleColorRed)
+            defaults.set(Double(newValue.customMiddleColorGreen), forKey: Key.customMiddleColorGreen)
+            defaults.set(Double(newValue.customMiddleColorBlue), forKey: Key.customMiddleColorBlue)
             defaults.set(Double(newValue.customDragColorRed), forKey: Key.customDragColorRed)
             defaults.set(Double(newValue.customDragColorGreen), forKey: Key.customDragColorGreen)
             defaults.set(Double(newValue.customDragColorBlue), forKey: Key.customDragColorBlue)
@@ -300,6 +325,9 @@ final class SettingsStore {
             Key.customRightColorRed: Double(defaults.customRightColorRed),
             Key.customRightColorGreen: Double(defaults.customRightColorGreen),
             Key.customRightColorBlue: Double(defaults.customRightColorBlue),
+            Key.customMiddleColorRed: Double(defaults.customMiddleColorRed),
+            Key.customMiddleColorGreen: Double(defaults.customMiddleColorGreen),
+            Key.customMiddleColorBlue: Double(defaults.customMiddleColorBlue),
             Key.customDragColorRed: Double(defaults.customDragColorRed),
             Key.customDragColorGreen: Double(defaults.customDragColorGreen),
             Key.customDragColorBlue: Double(defaults.customDragColorBlue)

@@ -73,6 +73,8 @@ struct ClickLightSettingsView: View {
                     return Color(nsColor: viewModel.settings.customLeftColor)
                 case .right:
                     return Color(nsColor: viewModel.settings.customRightColor)
+                case .middle:
+                    return Color(nsColor: viewModel.settings.customMiddleColor)
                 case .drag:
                     return Color(nsColor: viewModel.settings.customDragColor)
                 }
@@ -294,6 +296,12 @@ struct ClickLightSettingsView: View {
                                     title: "Right Click",
                                     subtitle: "Used for secondary-button pulses.",
                                     color: customClickColorBinding(.right)
+                                )
+                                Divider().padding(.vertical, 6)
+                                customColorRow(
+                                    title: "Middle Click",
+                                    subtitle: "Used for center-button pulses.",
+                                    color: customClickColorBinding(.middle)
                                 )
                                 Divider().padding(.vertical, 6)
                                 customColorRow(

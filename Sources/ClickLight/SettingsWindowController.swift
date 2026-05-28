@@ -190,6 +190,10 @@ final class ClickLightSettingsViewModel: NSObject, ObservableObject {
                 $0.customRightColorRed = rgb.redComponent
                 $0.customRightColorGreen = rgb.greenComponent
                 $0.customRightColorBlue = rgb.blueComponent
+            case .middle:
+                $0.customMiddleColorRed = rgb.redComponent
+                $0.customMiddleColorGreen = rgb.greenComponent
+                $0.customMiddleColorBlue = rgb.blueComponent
             case .drag:
                 $0.customDragColorRed = rgb.redComponent
                 $0.customDragColorGreen = rgb.greenComponent

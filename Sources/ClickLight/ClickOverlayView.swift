@@ -389,6 +389,8 @@ final class ClickOverlayView: NSView {
                     return settings.customLeftColor
                 case .rightDown, .rightUp:
                     return settings.customRightColor
+                case .middleDown, .middleUp:
+                    return settings.customMiddleColor
                 case .drag:
                     return settings.customDragColor
                 case .move:
