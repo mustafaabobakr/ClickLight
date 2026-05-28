@@ -5,7 +5,7 @@ struct HotKeyBinding: Equatable, Hashable, Sendable {
     let keyCode: Int
     let carbonModifiers: Int
 
-    static let defaultToggleModifiers: Int = Int(controlKey | optionKey | cmdKey)
+    static let defaultToggleModifiers: Int = Int(optionKey | cmdKey)
 
     var displayString: String {
         modifiersString + keyString
@@ -24,6 +24,22 @@ struct HotKeyBinding: Equatable, Hashable, Sendable {
         Self.keyCodeToDisplayString(keyCode) ?? "?"
     }
 
+    var menuKeyEquivalent: String? {
+        if let keyEquivalent = Self.menuKeyEquivalent(for: keyCode) {
+            return keyEquivalent
+        }
+
+        guard let keyString = Self.keyCodeToDisplayString(keyCode), keyString.count == 1 else {
+            return nil
+        }
+
+        return keyString.lowercased()
+    }
+
+    var menuModifierFlags: NSEvent.ModifierFlags {
+        Self.modifierFlags(from: carbonModifiers)
+    }
+
     static func carbonModifiers(from flags: NSEvent.ModifierFlags) -> Int {
         var mods = 0
         if flags.contains(.command) { mods |= Int(cmdKey) }
@@ -31,6 +47,15 @@ struct HotKeyBinding: Equatable, Hashable, Sendable {
         if flags.contains(.option) { mods |= Int(optionKey) }
         if flags.contains(.control) { mods |= Int(controlKey) }
         return mods
+    }
+
+    static func modifierFlags(from carbonModifiers: Int) -> NSEvent.ModifierFlags {
+        var flags: NSEvent.ModifierFlags = []
+        if carbonModifiers & Int(cmdKey) != 0 { flags.insert(.command) }
+        if carbonModifiers & Int(shiftKey) != 0 { flags.insert(.shift) }
+        if carbonModifiers & Int(optionKey) != 0 { flags.insert(.option) }
+        if carbonModifiers & Int(controlKey) != 0 { flags.insert(.control) }
+        return flags
     }
 
     static func keyCodeToDisplayString(_ code: Int) -> String? {
@@ -102,6 +127,17 @@ struct HotKeyBinding: Equatable, Hashable, Sendable {
         case kVK_F10: return "F10"
         case kVK_F11: return "F11"
         case kVK_F12: return "F12"
+        default: return nil
+        }
+    }
+
+    private static func menuKeyEquivalent(for code: Int) -> String? {
+        switch code {
+        case kVK_Return: return "\r"
+        case kVK_Tab: return "\t"
+        case kVK_Space: return " "
+        case kVK_Delete: return "\u{8}"
+        case kVK_Escape: return "\u{1b}"
         default: return nil
         }
     }

@@ -109,7 +109,10 @@ final class HotKeyManager {
 
     private func handleHotKey(id: UInt32) {
         guard let action = registeredHotKeys[id]?.action, let onTrigger else { return }
-        Task { @MainActor in
+        // Carbon delivers hot-key events on the main thread; invoke synchronously
+        // so the toggle happens even while the status menu's modal tracking loop
+        // is running (DispatchQueue.main.async would defer until the menu closes).
+        MainActor.assumeIsolated {
             onTrigger(action)
         }
     }

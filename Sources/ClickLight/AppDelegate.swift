@@ -17,7 +17,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         onCheckForUpdates: { UpdateChecker.shared.checkForUpdates() },
         updatesAreConfigured: { UpdateChecker.shared.isConfigured },
         onOpenSettings: { [weak self] in self?.openSettings() },
-        onQuit: { NSApplication.shared.terminate(nil) }
+        onQuit: { NSApplication.shared.terminate(nil) },
+        onMenuWillOpen: { [weak self] in
+            self?.hotKeyManager.unregisterAll()
+        },
+        onMenuDidClose: { [weak self] in
+            guard let self else { return }
+            self.configureHotKeysIfNeeded(with: self.settingsStore.settings, force: true)
+        }
     )
     private let eventTap = ClickEventTap()
     private let permissions = PermissionController()
@@ -102,6 +109,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func handleHotKeyAction(_ action: ClickShortcutAction) {
+        // Match the standard macOS menu-accelerator behavior: if the status
+        // menu is open when the shortcut fires, dismiss it (the same way ⌘,
+        // closes the menu after invoking Open Settings).
+        statusController.dismissMenu()
         switch action {
         case .toggleEnabled:
             settingsStore.update { $0.isEnabled.toggle() }
