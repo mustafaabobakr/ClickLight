@@ -113,6 +113,21 @@ struct ClickLightSettingsView: View {
         )
     }
 
+    private func laserColorPicker(title: String, color: Binding<Color>) -> some View {
+        HStack(spacing: 6) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            ColorPicker(
+                title,
+                selection: color,
+                supportsOpacity: false
+            )
+            .labelsHidden()
+            .accessibilityLabel("Laser Pointer \(title) Color")
+        }
+    }
+
     // MARK: - Pane Header
 
     private var paneHeader: some View {
@@ -436,6 +451,28 @@ struct ClickLightSettingsView: View {
                             .accessibilityLabel("Custom Color Picker")
                         }
                     }
+
+                    Divider()
+
+                    ModernRow(title: "Laser Pointer Color",
+                              subtitle: "Outer ring and inner fill. The middle color is blended automatically.") {
+                        HStack(spacing: 12) {
+                            laserColorPicker(
+                                title: "Outer",
+                                color: Binding(
+                                    get: { Color(nsColor: viewModel.settings.laserColor) },
+                                    set: { viewModel.applyLaserColor(NSColor($0)) }
+                                )
+                            )
+                            laserColorPicker(
+                                title: "Inner",
+                                color: Binding(
+                                    get: { Color(nsColor: viewModel.settings.laserInnerColor) },
+                                    set: { viewModel.applyLaserInnerColor(NSColor($0)) }
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -445,7 +482,7 @@ struct ClickLightSettingsView: View {
         SettingsCard {
             VStack(spacing: 0) {
                 ModernRow(title: "Laser Pointer Mode",
-                          subtitle: "Show a fading red pointer and draw temporary strokes while dragging.") {
+                          subtitle: "Show a fading pointer and draw temporary strokes while dragging.") {
                     Toggle("", isOn: binding(\.showLaserPointer))
                         .toggleStyle(.switch)
                         .labelsHidden()
