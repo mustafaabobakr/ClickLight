@@ -59,12 +59,123 @@ button:disabled {
   user-select: none;
 }
 
+@property --b1x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 18%;
+}
+
+@property --b1y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 24%;
+}
+
+@property --b2x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 72%;
+}
+
+@property --b2y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 22%;
+}
+
+@property --b3x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 48%;
+}
+
+@property --b3y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 82%;
+}
+
+@keyframes blobDrift {
+  0% {
+    --b1x: 18%;
+    --b1y: 24%;
+    --b2x: 72%;
+    --b2y: 22%;
+    --b3x: 48%;
+    --b3y: 82%;
+  }
+
+  14% {
+    --b1x: 32%;
+    --b1y: 14%;
+    --b2x: 58%;
+    --b2y: 38%;
+    --b3x: 22%;
+    --b3y: 68%;
+  }
+
+  28% {
+    --b1x: 10%;
+    --b1y: 42%;
+    --b2x: 82%;
+    --b2y: 12%;
+    --b3x: 64%;
+    --b3y: 74%;
+  }
+
+  42% {
+    --b1x: 48%;
+    --b1y: 18%;
+    --b2x: 28%;
+    --b2y: 54%;
+    --b3x: 78%;
+    --b3y: 88%;
+  }
+
+  57% {
+    --b1x: 22%;
+    --b1y: 58%;
+    --b2x: 76%;
+    --b2y: 32%;
+    --b3x: 38%;
+    --b3y: 56%;
+  }
+
+  71% {
+    --b1x: 62%;
+    --b1y: 28%;
+    --b2x: 14%;
+    --b2y: 18%;
+    --b3x: 56%;
+    --b3y: 92%;
+  }
+
+  85% {
+    --b1x: 8%;
+    --b1y: 16%;
+    --b2x: 68%;
+    --b2y: 46%;
+    --b3x: 32%;
+    --b3y: 72%;
+  }
+
+  100% {
+    --b1x: 18%;
+    --b1y: 24%;
+    --b2x: 72%;
+    --b2y: 22%;
+    --b3x: 48%;
+    --b3y: 82%;
+  }
+}
 .background {
+  animation: blobDrift 35s ease-in-out infinite;
   background:
-    radial-gradient(circle at 18% 24%, rgba(100, 216, 255, 0.58), transparent 26%),
-    radial-gradient(circle at 72% 22%, rgba(255, 93, 87, 0.45), transparent 28%),
-    radial-gradient(circle at 48% 82%, rgba(144, 247, 166, 0.32), transparent 34%),
+    radial-gradient(circle at var(--b1x) var(--b1y), rgba(100, 216, 255, 0.58), transparent 26%),
+      radial-gradient(circle at var(--b2x) var(--b2y), rgba(255, 93, 87, 0.45), transparent 28%),
+      radial-gradient(circle at var(--b3x) var(--b3y), rgba(144, 247, 166, 0.32), transparent 34%),
     linear-gradient(135deg, #07101a 0%, #14101d 46%, #080910 100%);
+  background-blend-mode: screen, screen, screen, normal;
   inset: 0;
   position: fixed;
   z-index: -2;
