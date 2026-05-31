@@ -168,11 +168,12 @@ button:disabled {
     --b3y: 82%;
   }
 }
+
 .background {
-  animation: blobDrift 35s ease-in-out infinite;
+  animation: blobDrift 60s ease-in-out infinite;
   background:
     radial-gradient(circle at var(--b1x) var(--b1y), rgba(100, 216, 255, 0.58), transparent 26%),
-      radial-gradient(circle at var(--b2x) var(--b2y), rgba(255, 93, 87, 0.45), transparent 28%),
+    radial-gradient(circle at var(--b2x) var(--b2y), rgba(255, 93, 87, 0.45), transparent 28%),
       radial-gradient(circle at var(--b3x) var(--b3y), rgba(144, 247, 166, 0.32), transparent 34%),
     linear-gradient(135deg, #07101a 0%, #14101d 46%, #080910 100%);
   background-blend-mode: screen, screen, screen, normal;
@@ -181,6 +182,19 @@ button:disabled {
   z-index: -2;
 }
 
+.background::before {
+  background: repeating-linear-gradient(to right,
+      transparent 20px,
+      transparent 18px,
+      rgba(255, 255, 255, 0.02) 38px,
+      rgba(255, 255, 255, 0.01) 40px);
+  content: "";
+  inset: -20% -50%;
+  position: absolute;
+  transform: perspective(900px) translateY(-10%) rotateX(20deg) rotateZ(10deg) scale(3);
+  transform-origin: center bottom;
+  background-blend-mode: color-dodge;
+}
 .background::after {
   background:
     linear-gradient(112deg, transparent 0 34%, rgba(255, 255, 255, 0.12) 42%, transparent 52%),
@@ -517,5 +531,3 @@ button:disabled {
 
   .menu {
     display: none;
-  
-}
