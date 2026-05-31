@@ -19,11 +19,9 @@ export default function Home() {
 	const surfaceRef = useRef<ClickSurfaceRef>(null)
 
 	function toggle(key: ToggleKey) {
-		setSettings((current) => {
-			const next = { ...current, [key]: !current[key] }
-			surfaceRef.current?.applySettings({ [key]: next[key] })
-			return next
-		})
+		const nextValue = !settings[key]
+		setSettings((current) => ({ ...current, [key]: nextValue }))
+		surfaceRef.current?.applySettings({ [key]: nextValue })
 	}
 
 	function updateProfile(name: ProfileName) {
