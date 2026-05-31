@@ -1,0 +1,48 @@
+{
+	"name": "clicklight-web",
+	"version": "0.0.1",
+	"description": "React click-visualization overlay — highlight pointer events for demos, screen sharing, and UX reviews",
+	"keywords": [
+		"clicklight",
+		"click",
+		"visualization",
+		"overlay",
+		"demo",
+		"screen-sharing",
+		"react",
+		"pointer"
+	],
+	"license": "MIT",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js"
+		},
+		"./styles.css": "./dist/index.css"
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"check-types": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"react": ">=18",
+		"react-dom": ">=18"
+	},
+	"devDependencies": {
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"tsup": "^8.0.0",
+		"typescript": "^5.0.0"
+	}
+}

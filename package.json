@@ -1,0 +1,18 @@
+{
+	"name": "clicklight-monorepo",
+	"private": true,
+	"packageManager": "npm@11.13.0",
+	"workspaces": [
+		"packages/*",
+		"website"
+	],
+	"scripts": {
+		"build": "turbo build",
+		"dev": "turbo dev",
+		"check-types": "turbo check-types",
+		"postinstall": "test -L website/node_modules/clicklight-web || ln -sf ../../packages/clicklight-web website/node_modules/clicklight-web"
+	},
+	"devDependencies": {
+		"turbo": "^2.9.16"
+	}
+}
