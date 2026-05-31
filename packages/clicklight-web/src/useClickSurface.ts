@@ -1,15 +1,13 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useLayoutEffect, useRef } from "react"
 import type React from "react"
-import {
-	LASER_CURSOR_FADE_MS,
-	LASER_MIN_POINT_DISTANCE,
-	LASER_STROKE_FADE_MS,
-	SHORTCUT_FADE_MS,
-	SHORTCUT_VISIBLE_MS,
-	displayKey,
-} from "./constants"
-import { profiles, themePalettes } from "./themes"
+import { displayKey } from "./constants"
+import { useLaserCursor } from "./hooks/useLaserCursor"
+import { useLaserStroke } from "./hooks/useLaserStroke"
+import { usePulses } from "./hooks/usePulses"
+import { useSettings } from "./hooks/useSettings"
+import { useShortcut } from "./hooks/useShortcut"
 import type { ClickKind, ClickSurfaceRef, DemoSettings, Pulse, Stroke, ThemePalette, TrailPoint } from "./types"
+import { pointFromEvent } from "./utils/pointer"
 
 /**
  * Return type of `useClickSurface`, containing all state and handlers needed
@@ -99,30 +97,25 @@ export function useClickSurface({
 }: {
 	defaultSettings?: Partial<DemoSettings>
 }): UseClickSurfaceResult {
-	const [settings, setSettings] = useState<DemoSettings>(() => ({
-		...profiles.Default,
-		...defaultSettings,
-	}))
-
-	const [pulses, setPulses] = useState<Pulse[]>([])
-	const [activeStroke, setActiveStroke] = useState<Stroke | null>(null)
-	const [fadingStrokes, setFadingStrokes] = useState<Stroke[]>([])
-	const [laserCursor, setLaserCursor] = useState<TrailPoint | null>(null)
-	const [laserCursorFading, setLaserCursorFading] = useState(false)
-	const [shortcut, setShortcut] = useState<string | null>(null)
-	const [shortcutFading, setShortcutFading] = useState(false)
-
+	// ── Sub-hooks ─────────────────────────────────────────────────────────────
+	const { settings, setSettings, palette } = useSettings({ defaultSettings })
 	const animationIdRef = useRef(0)
+	const { pulses, addPulse } = usePulses({ idRef: animationIdRef })
+	const { laserCursor, laserCursorFading, bumpLaserCursor, clearLaserCursor, fadeLaserCursor } = useLaserCursor()
+	const { activeStroke, fadingStrokes, extendStroke, finalizeStroke, clearStrokes } = useLaserStroke({
+		idRef: animationIdRef,
+	})
+	const { shortcut, shortcutFading, showShortcut, clearShortcut } = useShortcut()
+
+	// ── Shared surface ref ────────────────────────────────────────────────────
 	const surfaceRef = useRef<HTMLDivElement | null>(null)
+
+	// ── Pointer-tracking refs ─────────────────────────────────────────────────
 	const pointerDownRef = useRef(false)
 	const downPointRef = useRef<TrailPoint | null>(null)
 	const lastDragPointRef = useRef<TrailPoint | null>(null)
 	const hasDraggedRef = useRef(false)
 	const pressedKindRef = useRef<ClickKind>("press")
-	const shortcutFadeTimeoutRef = useRef<number | null>(null)
-	const shortcutRemoveTimeoutRef = useRef<number | null>(null)
-	const cursorFadeTimeoutRef = useRef<number | null>(null)
-	const cursorRemoveTimeoutRef = useRef<number | null>(null)
 
 	// Keep a ref in sync so handlers always read current settings without
 	// needing to be memoized (avoids stale closures if caller ever wraps in
@@ -132,70 +125,10 @@ export function useClickSurface({
 		settingsRef.current = settings
 	})
 
-	const palette = useMemo(() => themePalettes[settings.theme], [settings.theme])
-
-	function pointFromEvent(event: React.PointerEvent<HTMLDivElement>) {
-		const rect = surfaceRef.current?.getBoundingClientRect()
-		if (!rect) return null
-		return { x: event.clientX - rect.left, y: event.clientY - rect.top }
-	}
-
-	function addPulse(event: React.PointerEvent<HTMLDivElement>, kind: ClickKind) {
-		const point = pointFromEvent(event)
-		if (!point) return
-		const pulse: Pulse = { id: animationIdRef.current++, kind, ...point }
-		setPulses((current) => {
-			if (current.some((p) => p.id === pulse.id)) return current
-			return [...current.slice(-12), pulse]
-		})
-		globalThis.setTimeout(() => {
-			setPulses((current) => current.filter((item) => item.id !== pulse.id))
-		}, 900)
-	}
-
-	function clearCursorTimers() {
-		if (cursorFadeTimeoutRef.current) {
-			globalThis.clearTimeout(cursorFadeTimeoutRef.current)
-			cursorFadeTimeoutRef.current = null
-		}
-		if (cursorRemoveTimeoutRef.current) {
-			globalThis.clearTimeout(cursorRemoveTimeoutRef.current)
-			cursorRemoveTimeoutRef.current = null
-		}
-	}
-
-	function bumpLaserCursor(point: TrailPoint) {
-		clearCursorTimers()
-		setLaserCursor(point)
-		setLaserCursorFading(false)
-		cursorFadeTimeoutRef.current = globalThis.setTimeout(() => {
-			setLaserCursorFading(true)
-			cursorRemoveTimeoutRef.current = globalThis.setTimeout(() => {
-				setLaserCursor(null)
-				setLaserCursorFading(false)
-			}, LASER_CURSOR_FADE_MS)
-		}, 16)
-	}
-
+	// ── Orchestration helpers ─────────────────────────────────────────────────
 	function clearLaserVisuals() {
-		clearCursorTimers()
-		setLaserCursor(null)
-		setLaserCursorFading(false)
-		setActiveStroke(null)
-		setFadingStrokes([])
-	}
-
-	function clearShortcut() {
-		if (shortcutFadeTimeoutRef.current) {
-			globalThis.clearTimeout(shortcutFadeTimeoutRef.current)
-			shortcutFadeTimeoutRef.current = null
-		}
-		if (shortcutRemoveTimeoutRef.current) {
-			globalThis.clearTimeout(shortcutRemoveTimeoutRef.current)
-			shortcutRemoveTimeoutRef.current = null
-		}
-		setShortcut(null)
-		setShortcutFading(false)
+		clearLaserCursor()
+		clearStrokes()
 	}
 
 	function resetPointerState() {
@@ -205,10 +138,11 @@ export function useClickSurface({
 		hasDraggedRef.current = false
 	}
 
+	// ── Pointer handlers ──────────────────────────────────────────────────────
 	function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
 		event.currentTarget.setPointerCapture(event.pointerId)
 		pointerDownRef.current = true
-		const downPoint = pointFromEvent(event)
+		const downPoint = pointFromEvent(event, surfaceRef)
 		downPointRef.current = downPoint ? { id: animationIdRef.current++, ...downPoint } : null
 		lastDragPointRef.current = downPointRef.current
 		hasDraggedRef.current = false
@@ -217,20 +151,20 @@ export function useClickSurface({
 
 		if (event.button === 2 && current.right) {
 			pressedKindRef.current = "right"
-			addPulse(event, "right")
+			if (downPoint) addPulse({ ...downPoint, kind: "right" })
 			return
 		}
 		if (event.button === 1 && current.middle) {
 			pressedKindRef.current = "middle"
-			addPulse(event, "middle")
+			if (downPoint) addPulse({ ...downPoint, kind: "middle" })
 			return
 		}
 		pressedKindRef.current = "press"
-		if (current.press) addPulse(event, "press")
+		if (current.press && downPoint) addPulse({ ...downPoint, kind: "press" })
 	}
 
 	function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
-		const point = pointFromEvent(event)
+		const point = pointFromEvent(event, surfaceRef)
 		if (!point) return
 		const nextPoint: TrailPoint = { id: animationIdRef.current++, ...point }
 		const downPoint = downPointRef.current
@@ -245,7 +179,7 @@ export function useClickSurface({
 		if (pointerDownRef.current && hasDraggedRef.current && current.drag && lastDragPoint) {
 			const dragDistance = Math.hypot(point.x - lastDragPoint.x, point.y - lastDragPoint.y)
 			if (!current.laser && dragDistance > 18) {
-				addPulse(event, "drag")
+				addPulse({ ...point, kind: "drag" })
 				lastDragPointRef.current = nextPoint
 			} else if (current.laser && dragDistance > 8) {
 				lastDragPointRef.current = nextPoint
@@ -256,54 +190,31 @@ export function useClickSurface({
 		bumpLaserCursor(nextPoint)
 
 		if (pointerDownRef.current) {
-			setActiveStroke((stroke) => {
-				if (!stroke) {
-					return { id: animationIdRef.current++, points: [nextPoint, nextPoint] }
-				}
-				const last = stroke.points[stroke.points.length - 1]
-				if (Math.hypot(last.x - nextPoint.x, last.y - nextPoint.y) < LASER_MIN_POINT_DISTANCE) {
-					return stroke
-				}
-				return { ...stroke, points: [...stroke.points, nextPoint] }
-			})
+			extendStroke(nextPoint)
 		}
 	}
 
 	function handlePointerUp(event: React.PointerEvent<HTMLDivElement>) {
+		const point = pointFromEvent(event, surfaceRef)
 		const current = settingsRef.current
-		if (hasDraggedRef.current && current.drag) addPulse(event, "drag")
+
+		if (hasDraggedRef.current && current.drag && point) addPulse({ ...point, kind: "drag" })
 		if (current.release) {
-			if (pressedKindRef.current === "right") addPulse(event, "rightRelease")
-			else if (pressedKindRef.current === "middle") addPulse(event, "middleRelease")
-			else addPulse(event, "release")
+			if (pressedKindRef.current === "right" && point) addPulse({ ...point, kind: "rightRelease" })
+			else if (pressedKindRef.current === "middle" && point) addPulse({ ...point, kind: "middleRelease" })
+			else if (point) addPulse({ ...point, kind: "release" })
 		}
 
-		setActiveStroke((stroke) => {
-			if (stroke && stroke.points.length >= 2) {
-				setFadingStrokes((strokes) => {
-					if (strokes.some((s) => s.id === stroke.id)) return strokes
-					return [...strokes, stroke]
-				})
-				globalThis.setTimeout(() => {
-					setFadingStrokes((strokes) => strokes.filter((item) => item.id !== stroke.id))
-				}, LASER_STROKE_FADE_MS)
-			}
-			return null
-		})
-
+		finalizeStroke()
 		resetPointerState()
 	}
 
 	function handlePointerLeave() {
 		if (pointerDownRef.current) return
-		clearCursorTimers()
-		setLaserCursorFading(true)
-		cursorRemoveTimeoutRef.current = globalThis.setTimeout(() => {
-			setLaserCursor(null)
-			setLaserCursorFading(false)
-		}, LASER_CURSOR_FADE_MS)
+		fadeLaserCursor()
 	}
 
+	// ── Keyboard handler ──────────────────────────────────────────────────────
 	function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
 		const current = settingsRef.current
 		if (!current.keys || event.repeat) return
@@ -322,19 +233,10 @@ export function useClickSurface({
 		if (event.shiftKey) modifiers += "⇧"
 		if (event.metaKey) modifiers += "⌘"
 
-		setShortcut(modifiers + keyString)
-		setShortcutFading(false)
-		if (shortcutFadeTimeoutRef.current) globalThis.clearTimeout(shortcutFadeTimeoutRef.current)
-		if (shortcutRemoveTimeoutRef.current) globalThis.clearTimeout(shortcutRemoveTimeoutRef.current)
-		shortcutFadeTimeoutRef.current = globalThis.setTimeout(() => {
-			setShortcutFading(true)
-			shortcutRemoveTimeoutRef.current = globalThis.setTimeout(() => {
-				setShortcut(null)
-				setShortcutFading(false)
-			}, SHORTCUT_FADE_MS)
-		}, SHORTCUT_VISIBLE_MS)
+		showShortcut(modifiers + keyString)
 	}
 
+	// ── Public applySettings (cross-cutting: calls into multiple hooks) ────────
 	function applySettings(partial: Partial<DemoSettings>) {
 		setSettings((current) => {
 			const next = { ...current, ...partial }
