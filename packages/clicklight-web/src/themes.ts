@@ -52,6 +52,7 @@ export const profiles: Record<ProfileName, DemoSettings> = {
 		pulseDuration: 620,
 		pulseSize: 116,
 		theme: "red",
+		cursor: "crosshair",
 	},
 }
 

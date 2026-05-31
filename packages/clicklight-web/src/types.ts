@@ -1,3 +1,5 @@
+import type React from "react"
+
 /**
  * The kind of mouse interaction captured at the pointer level.
  *
@@ -101,6 +103,11 @@ export type DemoSettings = Record<ToggleKey, boolean> & {
 	pulseSize: number
 	/** Which built-in colour palette to apply to all overlay elements. */
 	theme: ThemeName
+	/**
+	 * CSS cursor value applied to the surface wrapper (e.g. `"crosshair"`, `"default"`, `"none"`).
+	 * Defaults to `"default"` when omitted.
+	 */
+	cursor?: React.CSSProperties["cursor"]
 }
 
 /**

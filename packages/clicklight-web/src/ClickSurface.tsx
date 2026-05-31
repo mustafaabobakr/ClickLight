@@ -105,6 +105,7 @@ export const ClickSurface = forwardRef<ClickSurfaceRef, ClickSurfaceProps>(funct
 		"--release-color": palette.active,
 		"--pulse-size": `${settings.pulseSize}px`,
 		"--right-color": palette.right,
+		cursor: settings.cursor ?? "default",
 	} as React.CSSProperties
 
 	return (
